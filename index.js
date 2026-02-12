@@ -3,6 +3,8 @@ const CHOICES = {
   paper: "paper",
   scissors: "scissors",
 };
+let humanScore = 0;
+let computerScore = 0;
 
 function getComputerChoice() {
   const randomNumber = Math.random();
@@ -33,10 +35,7 @@ function getHumanChoice() {
   }
 }
 
-function playGame() {
-  let humanScore = 0;
-  let computerScore = 0;
-
+function playGame(humanChoice) {
   function playRound(humanChoice, computerChoice) {
     if (humanChoice === computerChoice) {
       console.log("Tie");
@@ -79,14 +78,53 @@ function playGame() {
     }
   }
 
-  for (let i = 0; i < 5; i++) {
-    const humanSelection = getHumanChoice();
-    const computerSelection = getComputerChoice();
-    playRound(humanSelection, computerSelection);
-  }
-
-  console.log(`Human: ${humanScore}`);
-  console.log(`Computer: ${computerScore}`);
+  let humanSelection;
+  humanChoice
+    ? (humanSelection = humanChoice)
+    : (humanSelection = getHumanChoice());
+  const computerSelection = getComputerChoice();
+  playRound(humanSelection, computerSelection);
+  updateScores();
 }
 
-playGame();
+const buttons = document.querySelectorAll("button");
+for (const button of buttons) {
+  button.addEventListener("click", (event) => {
+    console.log(event.target.textContent);
+    switch (true) {
+      case event.target.textContent.toLowerCase() === "rock":
+        playGame(CHOICES.rock);
+        break;
+      case event.target.textContent.toLowerCase() === "paper":
+        playGame(CHOICES.paper);
+        break;
+      case event.target.textContent.toLowerCase() === "scissors":
+        playGame(CHOICES.scissors);
+        break;
+      default:
+        console.error("Failed to start click event");
+    }
+  });
+}
+
+function updateScores() {
+  const resultsList = document.querySelector(".results");
+  const scoresItems = resultsList.querySelectorAll("li");
+  for (const scoreItem of scoresItems) {
+    const span = scoreItem.firstElementChild;
+    if (scoreItem.textContent.trim().toLowerCase().includes("human")) {
+      span.textContent = humanScore.toString();
+    } else if (
+      scoreItem.textContent.trim().toLowerCase().includes("computer")
+    ) {
+      span.textContent = computerScore.toString();
+    }
+  }
+
+  if (computerScore >= 5 || humanScore >= 5) {
+    const winner = computerScore >= 5 ? "The computer" : "You";
+    const winText = document.createElement("h2");
+    winText.textContent = `${winner} won!`;
+    resultsList.appendChild(winText);
+  }
+}
